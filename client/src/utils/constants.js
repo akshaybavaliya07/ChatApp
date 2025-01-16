@@ -1,0 +1,1 @@
+const REACT_APP_BG_iMAGE = 'dnmbjkdb'
