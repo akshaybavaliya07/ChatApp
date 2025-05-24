@@ -4,7 +4,7 @@ import { io } from 'socket.io-client'
 import { appendMessage } from './utils/appendMessage'
 
 function App() {
-  const soket = useMemo(() => io('http://localhost:5000'), []);
+  const soket = useMemo(() => io('https://chat-app-api-peach.vercel.app/'), []);
 
   const [message, setMessage] = useState('');
 
