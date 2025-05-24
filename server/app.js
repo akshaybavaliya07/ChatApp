@@ -10,7 +10,7 @@ const users = {};
 
 const io = new Server(server, {
     cors: {
-        origin: 'https://chat-app-iota-nine-52.vercel.app/',
+        origin: 'http://localhost:3000/',
         methods: ['GET', 'POST'],
         credentials: true
     }

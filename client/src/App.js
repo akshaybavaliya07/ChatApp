@@ -1,40 +1,41 @@
 import './App.css'
-import { useEffect, useMemo, useState} from 'react'
-import { io } from 'socket.io-client'
-import { appendMessage } from './utils/appendMessage'
+import { useEffect, useState } from 'react'
+import {useSocket } from "./utils/socket.js"
+import NameModal from './components/NameModal.js'
+import { appendMessage } from './utils/appendMessage.js'
 
 function App() {
-  const soket = useMemo(() => io('https://chat-app-api-peach-nu.vercel.app/'), []);
-
+  const socket = useSocket();
   const [message, setMessage] = useState('');
+  const [name, setName] = useState('');
 
   useEffect(() => {
-    let name;
-    while (!name) {
-      const input = prompt('Enter your name to join:');
-      if (input && input.trim() !== '') name = input.trim();
-    }
-    soket.emit('new-user-joined', name);
+    if (!name) return;
 
-    soket.on('user-joined', async (name) => {
+    socket.emit('new-user-joined', name);
+
+    socket.on('user-joined', async (name) => {
       await appendMessage(`${name} joined the chat`, 'right');
       scrollToBottom();
     });
 
-    soket.on('recieve-message', async (data) => {
+    socket.on('recieve-message', async (data) => {
       await appendMessage(`${data.name}: ${data.message}`, 'left');
       scrollToBottom();
     });
 
-    soket.on('user-left', async (name) => {
+    socket.on('user-left', async (name) => {
       await appendMessage(`${name} left the chat`, 'right');
       scrollToBottom();
     });
 
-    return  ()=> {
-      soket.disconnect();
+    return () => {
+      socket.off('user-joined');
+      socket.off('recieve-message');
+      socket.off('user-left');
+      socket.disconnect();
     }
-  }, []);
+  }, [name, socket]);
 
   const scrollToBottom = () => {
     const container = document.querySelector('.container');
@@ -43,20 +44,23 @@ function App() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await appendMessage(`You: ${message}`, 'right');
+    const trimmedMessage = message.trim();
+    if (!trimmedMessage) return;
+    await appendMessage(`You: ${trimmedMessage}`, 'right');
     scrollToBottom();
-    soket.emit('send', message);
+    socket.emit('send', trimmedMessage);
     setMessage('');
   }
-  
+
   return (
     <>
-    <h1 className='text-yellow-300'>Welcome to iChat</h1>
-    <div className="container"></div>
-    <form className='form-container mt-5 md:mt-2' onSubmit={handleSubmit}>
-      <input type="text" value={message}  placeholder="Message" className='messageInput' onChange={e => setMessage(e.target.value)}/>
-      <button type='submit' className='cursor-pointer py-1 px-4 border-2 border-solid border-black rounded-lg bg-yellow-300'>send</button>
-    </form>
+      {!name && <NameModal onNameSubmit={setName} />}
+      <h1 className='text-yellow-300'>Welcome to iChat</h1>
+      <div className="container"></div>
+      <form className='form-container mt-5 md:mt-2' onSubmit={handleSubmit}>
+        <input type="text" value={message} placeholder="Message" className='messageInput' onChange={e => setMessage(e.target.value)} />
+        <button type='submit' className='cursor-pointer py-1 px-4 border-2 border-solid border-black rounded-lg bg-yellow-300'>send</button>
+      </form>
     </>
   );
 }

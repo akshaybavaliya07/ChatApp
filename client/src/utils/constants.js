@@ -1,1 +1,1 @@
-const REACT_APP_BG_iMAGE = 'dnmbjkdb'
+export const SOCKET_URL = 'https://chatapp-api-qf1v.onrender.com';

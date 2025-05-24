@@ -1,4 +1,4 @@
-// const audio = new Audio('/ting.mp3');
+const audio = new Audio('/ting.wav');
 
 export const appendMessage = async (message, position) => {
     const msgContainer = document.querySelector('.container');
@@ -6,5 +6,11 @@ export const appendMessage = async (message, position) => {
     messageElement.innerText = message;
     messageElement.classList.add('message', position);
     msgContainer.appendChild(messageElement);
-    // if(position === 'left') audio.play();
+    if (position === 'left') {
+    try {
+      await audio.play();
+    } catch (error) {
+      console.warn("Audio playback failed:", error);
+    }
+  }
 };
